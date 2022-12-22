@@ -98,51 +98,32 @@ int main() {
             // Update the game board with the player's move
             updateBoard(row, col, player, clearScreen);
 
-            // Check if the game is full before checking for a win or draw
-            bool gameFull = true;
-            for (int i = 0; i < ROWS; i++) {
-                for (int j = 0; j < COLS; j++) {
-                    if (board[i][j] == '\0') {  // '\0' represents an empty cell
-                        gameFull = false;
-                        break;
-                    }
-                }
-                if (!gameFull) {
-                    break;
-                }
+            // Check if the player has won
+            gameWon = checkForWin(player, clearScreen);
+            if (gameWon) {
+                std::cout << "Player " << player << " wins!" << std::endl;
+                gameOver = true;  // End the game
             }
 
-            // Check if the current player has won the game
-            if (checkForWin(player, clearScreen)) {
-                gameWon = true;
-                gameOver = true;
-            }
-
-            // Check if the game is a draw
-            if (gameFull && !gameDrawn) {
-                if (checkForDraw(clearScreen)) {
-                    gameDrawn = true;
-                    gameOver = true;
-                }
+            // Check if the game has ended in a draw
+            gameDrawn = checkForDraw(clearScreen);
+            if (gameDrawn) {
+                gameOver = true;  // End the game
             }
         }
 
-        // Switch to the other player if a valid move was made
+        // Clear the screen if necessary
         if (clearScreen) {
-            if (player == 'X') {
-                player = 'O';
-            }
-            else {
-                player = 'X';
-            }
+            // Clear the screen
+            system("cls");
         }
 
-        // Increment the move counter
-        moves++;
-
-        // Clear the screen if needed
-        if (clearScreen && !gameOver) {
-            system("cls");
+        // Switch to the other player
+        if (player == 'X') {
+            player = 'O';
+        }
+        else {
+            player = 'X';
         }
     }
 
@@ -154,14 +135,6 @@ int main() {
             std::cout << board[i][j] << " ";
         }
         std::cout << std::endl;
-    }
-
-    // Display the game result
-    if (gameWon) {
-        std::cout << "Player " << player << " wins!" << std::endl;
-    }
-    else if (gameDrawn) {
-        std::cout << "Game drawn!" << std::endl;
     }
 
     return 0;
