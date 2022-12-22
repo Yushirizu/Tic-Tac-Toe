@@ -7,13 +7,14 @@ const int COLS = 3;
 char board[ROWS][COLS] = {};  // Initialize all cells to be empty
 int moves = 0;  // Keep track of the number of moves
 
-void updateBoard(int row, int col, char player) {
+void updateBoard(int row, int col, char player, bool& clearScreen) {
     if (board[row][col] == '\0') {  // Check if the cell is empty
         board[row][col] = player;  // Update the game board with the player's move
         moves++;  // Increment the number of moves
     }
     else {
         std::cout << "That cell is already occupied. Please try again." << std::endl;
+        clearScreen = false;  // Do not clear the screen
     }
 }
 
@@ -63,6 +64,8 @@ int main() {
     char player = 'X';  // Start with X
 
     while (!gameOver) {
+        bool clearScreen = true;  // Flag to determine whether to clear the screen
+
         // Display the game board
         std::cout << "  0 1 2" << std::endl;
         for (int i = 0; i < ROWS; i++) {
@@ -79,7 +82,7 @@ int main() {
         std::cin >> row >> col;
 
         // Update the game board with the player's move
-        updateBoard(row, col, player);
+        updateBoard(row, col, player, clearScreen);
 
         // Check if the current player has won the game
         if (checkForWin(player)) {
@@ -104,9 +107,13 @@ int main() {
         // Increment the move counter
         moves++;
 
-        // Clear the screen
-        system("cls");
+        // Clear the screen if needed
+        if (clearScreen) {
+            system("cls");
+        }
     }
 
     return 0;
+
+
 }
