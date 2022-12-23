@@ -15,6 +15,7 @@ void updateBoard(int row, int col, char player, bool& clearScreen) {
     else {
         std::cout << "That cell is already occupied. Please try again." << std::endl;
         clearScreen = false;  // Do not clear the screen
+        return;  // Return immediately and continue execution at the next iteration of the loop
     }
 }
 
@@ -136,6 +137,8 @@ int main() {
         }
         std::cout << std::endl;
     }
+
+    system("pause");
 
     return 0;
 }
