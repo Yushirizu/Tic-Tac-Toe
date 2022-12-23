@@ -7,42 +7,73 @@ const int COLS = 3;
 char board[ROWS][COLS] = {};  // Initialize all cells to be empty
 int moves = 0;  // Keep track of the number of moves
 
-void updateBoard(int row, int col, char player, bool& clearScreen) {
-    if (board[row][col] == '\0') {  // Check if the cell is empty
-        board[row][col] = player;  // Update the game board with the player's move
-        moves++;  // Increment the number of moves
-    }
-    else {
-        std::cout << "That cell is already occupied. Please try again." << std::endl;
-        clearScreen = false;  // Do not clear the screen
-        return;  // Return immediately and continue execution at the next iteration of the loop
-    }
+void clearScreen() {
+    // Clear the screen
+    std::cout << "\033[2J\033[1;1H";
 }
 
-bool checkForWin(char player, bool& clearScreen) {
+bool isValidMove(int row, char col) {
+    // Convert the column letter to a column index (0, 1, or 2)
+    int colIndex = -1;
+    if (col == 'A' || col == 'a') {
+        colIndex = 0;
+    }
+    else if (col == 'B' || col == 'b') {
+        colIndex = 1;
+    }
+    else if (col == 'C' || col == 'c') {
+        colIndex = 2;
+    }
+
+    // Check if the column index is within the valid range
+    if (colIndex < 0 || colIndex >= COLS) {
+        std::cout << "Invalid move. Please try again." << std::endl;
+        return false;
+    }
+
+    // Check if the row value is within the valid range
+    if (row < 1 || row > ROWS) {
+        std::cout << "Invalid move. Please try again." << std::endl;
+        return false;
+    }
+
+    // Convert the row label to a row index (0, 1, or 2)
+    int rowIndex = row - 1;
+
+    // Check if the cell is empty
+    if (board[rowIndex][colIndex] != '\0') {
+        std::cout << "That cell is already occupied. Please try again." << std::endl;
+        return false;
+    }
+
+    // If the row and column values are within the valid range and the cell is empty, return true
+    return true;
+}
+
+void updateBoard(int row, int col, char player) {
+    board[row][col] = player;  // Update the game board with the player's move
+    moves++;  // Increment the number of moves
+}
+
+bool checkForWin(char player) {
     // Check for three in a row horizontally
     for (int i = 0; i < ROWS; i++) {
         if (board[i][0] == player && board[i][1] == player && board[i][2] == player) {
-            clearScreen = false;  // Do not clear the screen
             return true;
         }
     }
-
     // Check for three in a row vertically
     for (int j = 0; j < COLS; j++) {
         if (board[0][j] == player && board[1][j] == player && board[2][j] == player) {
-            clearScreen = false;  // Do not clear the screen
             return true;
         }
     }
 
     // Check for three in a row diagonally
     if (board[0][0] == player && board[1][1] == player && board[2][2] == player) {
-        clearScreen = false;  // Do not clear the screen
         return true;
     }
     if (board[0][2] == player && board[1][1] == player && board[2][0] == player) {
-        clearScreen = false;  // Do not clear the screen
         return true;
     }
 
@@ -50,7 +81,7 @@ bool checkForWin(char player, bool& clearScreen) {
     return false;
 }
 
-bool checkForDraw(bool& clearScreen) {
+bool checkForDraw() {
     // Check if all cells are filled
     for (int i = 0; i < ROWS; i++) {
         for (int j = 0; j < COLS; j++) {
@@ -62,23 +93,31 @@ bool checkForDraw(bool& clearScreen) {
 
     // If all cells are filled and no winner, return true
     std::cout << "The game has ended in a draw." << std::endl;
-    clearScreen = false;  // Do not clear the screen
     return true;
 }
 
+void resetGame() {
+    // Reset the game board
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
+            board[i][j] = '\0';
+        }
+    }
+    moves = 0;  // Reset the number of moves
 
+    // Prompt the players to start a new game
+    std::cout << "New game started. Player X goes first." << std::endl;
+}
 int main() {
     bool gameOver = false;
     char player = 'X';  // Start with X
-    bool gameWon = false;  // Flag to track whether the game has been won
-    bool gameDrawn = false;  // Flag to track whether the game has been declared a draw
     while (!gameOver) {
-        bool clearScreen = true;  // Flag to determine whether to clear the screen
+        clearScreen();  // Clear the screen before displaying the game board
 
         // Display the game board
-        std::cout << "  0 1 2" << std::endl;
+        std::cout << "    A B C" << std::endl;
         for (int i = 0; i < ROWS; i++) {
-            std::cout << i << " ";
+            std::cout << i + 1 << "   ";
             for (int j = 0; j < COLS; j++) {
                 std::cout << board[i][j] << " ";
             }
@@ -87,58 +126,59 @@ int main() {
 
         // Prompt the player for their move
         std::cout << "Player " << player << ", enter your move (row column): ";
-        int row, col;
+        int row;
+        char col;
         std::cin >> row >> col;
 
-        // Check if the row and column values are within the valid range
-        if (row < 0 || row >= ROWS || col < 0 || col >= COLS) {
-            std::cout << "Invalid move. Please try again." << std::endl;
-            clearScreen = false;  // Do not clear the screen
-        }
-        else {
+        // Check if the move is vaild
+        if (isValidMove(row, col)) {
+            // Convert the column letter to a column index (0, 1, or 2)
+            int colIndex = -1;
+            if (col == 'A' || col == 'a') {
+                colIndex = 0;
+            }
+            else if (col == 'B' || col == 'b') {
+                colIndex = 1;
+            }
+            else if (col == 'C' || col == 'c') {
+                colIndex = 2;
+            }
+
+            // Convert the row label to a row index (0, 1, or 2)
+            int rowIndex = row - 1;
+
             // Update the game board with the player's move
-            updateBoard(row, col, player, clearScreen);
+            updateBoard(rowIndex, colIndex, player);
 
             // Check if the player has won
-            gameWon = checkForWin(player, clearScreen);
-            if (gameWon) {
-                std::cout << "Player " << player << " wins!" << std::endl;
-                gameOver = true;  // End the game
+            if (checkForWin(player)) {
+                std::cout << "Player " << player << " has won!" << std::endl;
+                gameOver = true;
+                continue;
             }
-
             // Check if the game has ended in a draw
-            gameDrawn = checkForDraw(clearScreen);
-            if (gameDrawn) {
-                gameOver = true;  // End the game
+            if (checkForDraw()) {
+                gameOver = true;
+                continue;
+            }
+
+            // Switch to the other player
+            if (player == 'X') {
+                player = 'O';
+            }
+            else {
+                player = 'X';
             }
         }
-
-        // Clear the screen if necessary
-        if (clearScreen) {
-            // Clear the screen
-            system("cls");
-        }
-
-        // Switch to the other player
-        if (player == 'X') {
-            player = 'O';
-        }
-        else {
-            player = 'X';
-        }
     }
-
-    // Display the final game board
-    std::cout << "  0 1 2" << std::endl;
-    for (int i = 0; i < ROWS; i++) {
-        std::cout << i << " ";
-        for (int j = 0; j < COLS; j++) {
-            std::cout << board[i][j] << " ";
-        }
-        std::cout << std::endl;
+    // Prompt the players to start a new game
+    std::cout << "Type 'reset' to start a new game: ";
+    std::string input;
+    std::cin >> input;
+    // If the player wants to start a new game, reset the game
+    if (strcmp(input.c_str(), "reset") == 0) {
+        resetGame();
     }
-
-    system("pause");
 
     return 0;
 }
